@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Admission System</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #00796b; /* Professional Teal */
+            --page-bg: #f4f7f6;
+            --form-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--page-bg);
+            color: var(--text-dark);
+        }
+        
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            width: 260px; height: 100vh;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 1.5rem;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1050;
+            overflow-y: auto;
+        }
+        .sidebar.active { transform: translateX(0); }
+        .sidebar-header { margin-bottom: 2rem; text-align: center; }
+        .sidebar-logo {
+            width: 90px;
+            height: auto;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+        }
+        .sidebar-header h3 { color: #ffffff; font-weight: 700; font-size: 1.5rem; }
+        .sidebar-nav { list-style: none; padding: 0; }
+        .sidebar-nav li { margin-bottom: 0.5rem; }
+        .sidebar-nav a {
+            display: flex; align-items: center;
+            padding: 0.75rem 1rem; border-radius: 8px;
+            color: #ecf0f1; text-decoration: none;
+            font-size: 1.1rem; font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .sidebar-nav a i { margin-right: 0.75rem; }
+        .sidebar-nav a:hover { background-color: #34495e; }
+        .sidebar-nav a.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+        .sidebar-toggle-btn {
+            position: fixed; top: 15px; left: 15px;
+            font-size: 1.8rem; background-color: #fff;
+            border: none; border-radius: 8px;
+            padding: 5px 12px; z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .main-content {
+            padding: 2rem;
+            padding-top: 80px;
+            transition: margin-left 0.3s ease-in-out;
+            margin-left: 0;
+        }
+        body.sidebar-active .main-content {
+            margin-left: 260px;
+        }
+        .sidebar-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 1040;
+        }
+        .sidebar-overlay.active { display: block; }
+        @media (max-width: 992px) {
+            body.sidebar-active .main-content { margin-left: 0; }
+        }
+        
+        /* --- NEW: Elegant Form Styles --- */
+        .elegant-form {
+            background-color: var(--form-bg);
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+            border-top: 5px solid var(--primary-color);
+            overflow: hidden;
+        }
+        .form-main-header {
+            text-align: center;
+            padding: 40px 20px 20px 20px;
+            border-bottom: 1px solid var(--page-bg);
+            margin-bottom: 30px;
+        }
+        .form-main-header h1 {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.75rem;
+        }
+        .form-main-header p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+        .form-section-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-top: 20px;
+            margin-bottom: 25px;
+            font-size: 1.25rem;
+        }
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #fdfdfd;
+            padding: 0.65rem 1rem;
+        }
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(0,121,107,0.15);
+            border-color: var(--primary-color);
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 12px 30px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #00695c; /* Darker teal */
+            border-color: #00695c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="/Logo.jpg" alt="IIUI Logo" class="sidebar-logo">
+            <h3>IIUI Schools</h3>
+        </div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="index.html" class="active">
+                    <i class="bi bi-person-plus-fill"></i> New Admission
+                </a>
+            </li>
+            <li>
+                <a href="dashboard.html">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="challan-dashboard.html">
+                    <i class="bi bi-receipt-cutoff"></i> Challan Section
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <main class="main-content" id="main-content">
+        
+        <button class="btn sidebar-toggle-btn" id="sidebar-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card elegant-form">
+                        <div class="card-body p-4 p-md-5">
+                            
+                            <div class="form-main-header">
+                                <h1>Admission Form</h1>
+                                <img src="/Logo.jpg" alt="IIUI Logo" class="sidebar-logo">
+                                <p>International Islamic University Schools</p>
+                            </div>
+                            
+                            <form id="admissionForm">
+
+                                <h3 class="form-section-title">1. Student Information</h3>
+                                <div class="mb-3">
+                                    <label for="studentName" class="form-label">1. Name of the student:</label>
+                                    <input type="text" class="form-control" id="studentName" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentDOB" class="form-label">2. Date of birth:</label>
+                                        <input type="date" class="form-control" id="studentDOB" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentNationality" class="form-label">3. Place of birth & nationality:</label>
+                                        <input type="text" class="form-control" id="studentNationality">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="studentClassSelect" class="form-label">4. Class into which admission is sought:</label>
+                                    <select class="form-select" id="studentClassSelect" required>
+                                        <option value="" selected disabled>-- Please select a class --</option>
+                                        <option value="Reception">Reception</option>
+                                        <option value="Reception 1">Reception 1</option>
+                                        <optgroup label="Grades">
+                                            <option value="Grade 1">Grade 1</option>
+                                            <option value="Grade 2">Grade 2</option>
+                                            <option value="Grade 3">Grade 3</option>
+                                            <option value="Grade 4">Grade 4</option>
+                                            <option value="Grade 5">Grade 5</option>
+                                            <option value="Grade 6">Grade 6</option>
+                                            <option value="Grade 7">Grade 7</option>
+                                            <option value="Grade 8">Grade 8</option>
+                                            <option value="Grade 9">Grade 9</option>
+                                            <option value="Grade 10">Grade 10</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="studentSectionDiv" style="display: none;">
+                                    <label for="studentSectionSelect" class="form-label">Section:</label>
+                                    <select class="form-select" id="studentSectionSelect"></select>
+                                </div>
+                                <input type="hidden" id="studentClass">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentLastSchool" class="form-label">5. Last School Attended:</label>
+                                        <input type="text" class="form-control" id="studentLastSchool">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="studentReason" class="form-label">6. Reason for Leaving last school:</label>
+                                        <input type="text" class="form-control" id="studentReason">
+                                    </div>
+                                </div>
+
+                                <h3 class="form-section-title">2. Parent / Guardian Information</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fatherName" class="form-label">7. Father's Name:</label>
+                                        <input type="text" class="form-control" id="fatherName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fatherOccupation" class="form-label">8. Father's Occupation:</label>
+                                        <input type="text" class="form-control" id="fatherOccupation">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fatherContact" class="form-label">9. Father's Office Address & Contact Details:</label>
+                                    <textarea class="form-control" id="fatherContact" rows="2"></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="motherName" class="form-label">10. Mother's Name:</label>
+                                        <input type="text" class="form-control" id="motherName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="motherOccupation" class="form-label">11. Mother's Occupation:</label>
+                                        <input type="text" class="form-control" id="motherOccupation">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="motherContact" class="form-label">12. Mother's Office Address & Contact Details:</label>
+                                    <textarea class="form-control" id="motherContact" rows="2"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="guardianName" class="form-label">13. Guardian's Name (if required):</label>
+                                    <input type="text" class="form-control" id="guardianName">
+                                </div>
+
+                                <h3 class="form-section-title">3. Contact & Other Details</h3>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">14. Residential Address:</label>
+                                    <textarea class="form-control" id="address" rows="3" required></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="contactDetails" class="form-label">15. Contact Details (Phone, email):</label>
+                                    <input type="text" class="form-control" id="contactDetails" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="siblings" class="form-label">16. Brothers/Sisters in this school:</label>
+                                    <textarea class="form-control" id="siblings" rows="2" placeholder="Please give names & classes"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="medical" class="form-label">17. Medical Information (allergies, etc):</label>
+                                    <textarea class="form-control" id="medical" rows="2"></textarea>
+                                </div>
+
+                                <h3 class="form-section-title">4. Parent Certificate & Agreement</h3>
+                                <div class="alert alert-light border">
+                                    <p class="fw-bold">Note: Parents are requested to carefully read...</p>
+                                    </div>
+                                <div class="form-check mb-3 p-3">
+                                    <input class="form-check-input" type="checkbox" id="certification" required>
+                                    <label class="form-check-label" for="certification">
+                                        I certify that the particulars are correct and I will abide by the school rules.
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="parentName" class="form-label">Name of Parent/Guardian (as digital signature):</label>
+                                    <input type="text" class="form-control" id="parentName" required>
+                                </div>
+
+                                <h3 class="form-section-title">5. Fee Collection Record (For Office Use)</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="admissionFee" class="form-label">1. Admission Fee:</label>
+                                        <input type="number" class="form-control" id="admissionFee" placeholder="e.g., 5000">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="securityFee" class="form-label">2. Security Fee:</label>
+                                        <input type="number" class="form-control" id="securityFee" placeholder="e.g., 3000">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="annualFee" class="form-label">3. Annual Fee:</label>
+                                        <input type="number" class="form-control" id="annualFee" placeholder="e.g., 1000">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="tuitionFee" class="form-label">4. Tuition Fee:</label>
+                                        <input type="number" class="form-control" id="tuitionFee" placeholder="e.g., 2500">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="concession" class="form-label">Concession granted if any:</label>
+                                    <input type="text" class="form-control" id="concession" placeholder="e.g., 10% on Tuition Fee">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="chalanIssued" class="form-label">Admission Fee Chalan issued on:</label>
+                                        <input type="date" class="form-control" id="chalanIssued">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="dueDate" class="form-label">Due Date:</label>
+                                        <input type="date" class="form-control" id="dueDate">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="feePaidOn" class="form-label">Admission Fee paid on:</label>
+                                        <input type="text" class="form-control" id="feePaidOn" placeholder="Leave blank, fill later...">
+                                    </div>
+                                    
+                                </div>
+                                
+                                <hr class="my-4">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Toggle Script
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const overlay = document.getElementById('sidebar-overlay');
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                document.body.classList.toggle('sidebar-active');
+            };
+            toggleBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+        });
+    </script>
+    
+    <script type="module">
+    // --- 1. IMPORT FIREBASE FUNCTIONS ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+        getFirestore, collection, doc,
+        runTransaction
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // --------------------------------------------------------------------
+    // Your Firebase Config
+    // --------------------------------------------------------------------
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIVlksOyjV4e6TyiJysL7ovITrQ60v7Q4",
+        authDomain: "feesystem-fe78e.firebaseapp.com",
+        projectId: "feesystem-fe78e",
+        storageBucket: "feesystem-fe78e.firebasestorage.app",
+        messagingSenderId: "772128934957",
+        appId: "1:772128934957:web:0eeeebed3be0343cf77ca4",
+        measurementId: "G-XQ0HWT03HK"
+    };
+    // --------------------------------------------------------------------
+
+    // --- 2. INITIALIZE FIREBASE ---
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    console.log("Firebase connected!");
+
+    // --- 3. DEPENDENT DROPDOWN LOGIC ---
+    const classSections = {
+        "Reception": ["Blue", "Red", "Orange"],
+        "Grade 1": ["Section A", "Section B"],
+        "Grade 2": ["Section A", "Section B"],
+        "Grade 3": ["Section A", "Section B"],
+        "Grade 4": ["Section A", "Section B"],
+        "Grade 5": ["Section A", "Section B"],
+        "Grade 6": ["Section A", "Section B"],
+        "Grade 7": ["Section A", "Section B"],
+        "Grade 8": ["Section A", "Section B"],
+        "Grade 9": ["Section A", "Section B"],
+        "Grade 10": ["Section A", "Section B"]
+    };
+    const classSelect = document.getElementById('studentClassSelect');
+    const sectionDiv = document.getElementById('studentSectionDiv');
+    const sectionSelect = document.getElementById('studentSectionSelect');
+    const hiddenClassInput = document.getElementById('studentClass'); 
+
+    classSelect.addEventListener('change', () => {
+        const selectedClass = classSelect.value;
+        sectionSelect.innerHTML = '';
+        if (classSections.hasOwnProperty(selectedClass)) {
+            sectionDiv.style.display = 'block';
+            sectionSelect.required = true;
+            let defaultOption = new Option('-- Select a section --', '');
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            sectionSelect.add(defaultOption);
+            classSections[selectedClass].forEach(section => {
+                sectionSelect.add(new Option(section, section));
+            });
+            hiddenClassInput.value = '';
+        } else {
+            sectionDiv.style.display = 'none';
+            sectionSelect.required = false;
+            hiddenClassInput.value = selectedClass;
+        }
+    });
+    sectionSelect.addEventListener('change', () => {
+        const selectedClass = classSelect.value;
+        const selectedSection = sectionSelect.value;
+        hiddenClassInput.value = `${selectedClass} (${selectedSection})`;
+    });
+    // --- END OF DROPDOWN LOGIC ---
+
+
+    // --- 4. FORM SUBMISSION LOGIC ---
+    const admissionForm = document.getElementById('admissionForm');
+    admissionForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submitButton = event.target.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+
+        try {
+            // 1. Get all the values from the form fields
+            const studentData = {
+                studentName: document.getElementById('studentName').value,
+                studentDOB: document.getElementById('studentDOB').value,
+                studentNationality: document.getElementById('studentNationality').value,
+                studentClass: document.getElementById('studentClass').value,
+                studentLastSchool: document.getElementById('studentLastSchool').value,
+                studentReason: document.getElementById('studentReason').value,
+                fatherName: document.getElementById('fatherName').value,
+                fatherOccupation: document.getElementById('fatherOccupation').value,
+                fatherContact: document.getElementById('fatherContact').value,
+                motherName: document.getElementById('motherName').value,
+                motherOccupation: document.getElementById('motherOccupation').value,
+                motherContact: document.getElementById('motherContact').value,
+                guardianName: document.getElementById('guardianName').value,
+                address: document.getElementById('address').value,
+                contactDetails: document.getElementById('contactDetails').value,
+                siblings: document.getElementById('siblings').value,
+                medical: document.getElementById('medical').value,
+                parentName: document.getElementById('parentName').value,
+                submissionTimestamp: new Date(),
+                admissionFee: document.getElementById('admissionFee').value,
+                securityFee: document.getElementById('securityFee').value,
+                annualFee: document.getElementById('annualFee').value,
+                tuitionFee: document.getElementById('tuitionFee').value,
+                concession: document.getElementById('concession').value,
+                chalanIssued: document.getElementById('chalanIssued').value,
+                dueDate: document.getElementById('dueDate').value,
+                feePaidOn: document.getElementById('feePaidOn').value
+                // The manual 'rollNo' field is now gone
+            };
+
+            // 2. Run a "Transaction" to get BOTH new IDs
+            const { newAdmissionId, newRollNo } = await runTransaction(db, async (transaction) => {
+                // Get Admission ID Counter
+                const admissionCounterRef = doc(db, "counters", "studentCounter");
+                const admissionCounterDoc = await transaction.get(admissionCounterRef);
+                const currentAdmissionId = admissionCounterDoc.data()?.currentId || 0;
+                const newAdmissionNum = currentAdmissionId + 1;
+                const admissionId = `IIUI-${String(newAdmissionNum).padStart(3, '0')}`;
+                
+                // --- NEW: Get Roll No Counter ---
+                const rollNoCounterRef = doc(db, "counters", "rollNoCounter");
+                const rollNoCounterDoc = await transaction.get(rollNoCounterRef);
+                const currentRollNo = rollNoCounterDoc.data()?.currentId || 100; // Default to 100
+                const newRollNoNum = currentRollNo + 1;
+                const rollNo = `GR-${newRollNoNum}`; // Format: GR-101
+                // --- END NEW ---
+
+                // --- Save the new student ---
+                const newStudentRef = doc(db, "admissions", admissionId);
+                
+                // Add BOTH new IDs to the student's data
+                studentData.admissionId = admissionId;
+                studentData.rollNo = rollNo; 
+                
+                transaction.set(newStudentRef, studentData); // Save the student
+                
+                // --- Update BOTH counters ---
+                transaction.update(admissionCounterRef, { currentId: newAdmissionNum });
+                transaction.update(rollNoCounterRef, { currentId: newRollNoNum });
+                
+                // Return both new IDs
+                return { newAdmissionId: admissionId, newRollNo: rollNo };
+            });
+
+            // 3. The transaction is complete!
+            console.log(`Document written with ID: ${newAdmissionId}, Roll No: ${newRollNo}`);
+            
+            // 4. Send the data (including new IDs) to the print page
+            studentData.admissionId = newAdmissionId;
+            studentData.rollNo = newRollNo;
+            localStorage.setItem('lastSubmissionData', JSON.stringify(studentData));
+
+            // 5. Open the print window
+            window.open('print.html', '_blank');
+
+            // 6. Clear the form
+            admissionForm.reset();
+            sectionDiv.style.display = 'none';
+            sectionSelect.innerHTML = '';
+
+            // 7. Show the success alert (LAST)
+            alert(`Application Submitted!\nAdmission ID: ${newAdmissionId}\nRoll No: ${newRollNo}`);
+
+        } catch (error) {
+            console.error("Error creating admission: ", error);
+            alert('Error: Could not submit application. Please try again.');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = 'Submit Application';
+        }
+    });
+</script>
+</body>
+</html>

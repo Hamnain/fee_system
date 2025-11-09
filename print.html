@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Admission Form</title>
+
+    <style>
+        /* Use simple, print-friendly fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            background-color: #e9ecef;
+            /* Gray background to see the 'paper' */
+            font-family: 'Roboto', sans-serif;
+            font-size: 11pt;
+        }
+
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            /* Use min-height to allow content to grow */
+            padding: 20mm;
+            /* Standard 2cm margins */
+            margin: 1rem auto;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+            box-sizing: border-box;
+            /* Ensures padding is included in width */
+
+            /* --- NEW: Center all text by default --- */
+            text-align: center;
+        }
+
+        /* --- Overrides: Re-align things that should be on the left --- */
+        .form-title-line,
+        .form-table td,
+        .section-note ol,
+        .section-note h5,
+        /* The "Note:" title */
+        .section-certificate p,
+        .signature-line div,
+        .official-use-section .row div {
+            text-align: left;
+        }
+
+        /* All other styles remain the same */
+        .form-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-header h3 {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .form-header h4 {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 700;
+            margin: 0.25rem 0;
+            font-size: 1.3rem;
+        }
+
+        .form-title-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            margin-bottom: 1rem;
+            padding-bottom: 5px;
+        }
+
+        .form-title-line h5 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .form-title-line span {
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 2px solid #000;
+        }
+
+        .form-table tr {
+            border-bottom: 1px solid #000;
+        }
+
+        .form-table td {
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        .form-table .label {
+            width: 35%;
+            font-weight: 400;
+            border-right: 1px solid #000;
+        }
+
+        .form-table .value {
+            width: 65%;
+            font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+            font-weight: 500;
+            font-size: 1.1rem;
+            min-height: 25px;
+        }
+
+        .section-note {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .section-note h5 {
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .section-note ol {
+            padding-left: 20px;
+        }
+
+        .section-note li {
+            margin-bottom: 4px;
+        }
+
+        .section-certificate {
+            margin-top: 2rem;
+        }
+
+        .section-certificate h5 {
+            font-weight: 700;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        /* This STAYS centered */
+        .section-certificate p {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .signature-line {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4rem;
+        }
+
+        .signature-line div {
+            border-top: 1px solid #000;
+            width: 40%;
+            padding-top: 5px;
+            font-weight: 700;
+        }
+
+        .official-use-section {
+            margin-top: 2rem;
+            border: 2px solid #000;
+            padding: 1rem;
+        }
+
+        .official-use-section h5 {
+            text-align: center;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        /* This STAYS centered */
+        .official-use-section .row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .official-use-section .line {
+            border-bottom: 1px dotted #000;
+            width: 70%;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body {
+                background-color: #ffffff;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            .a4-page {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            #page-2 {
+                page-break-before: always;
+            }
+        }
+        .sidebar-logo {
+            width: 90px;
+            height: auto;
+            margin-bottom: 0.75rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="text-center my-3 no-print">
+        <p>A print dialog will open automatically. This is a 2-page document.</p>
+        <button class="btn btn-primary" onclick="window.print()" style="padding:10px 20px;">Print Again</button>
+        <button class="btn btn-secondary" onclick="window.close()" style="padding:10px 20px;">Close Tab</button>
+    </div>
+
+    <div class="a4-page" id="page-1">
+        <div class="form-header">
+                        <img src="/Logo.jpg" alt="IIUI Logo" class="sidebar-logo">
+            <h3>INTERNATIONAL ISLAMIC UNIVERSITY ISLAMABAD SCHOOLS</h3>
+            <h4>Ali Pur Chattha Campus</h4>
+            <h4>Phone: 055-6332248, 0306-1222411</h4>
+            <h4>Email: iiuiapc@yahoo.com</h4>
+        </div>
+
+        <div class="form-title-line">
+            <h5>ADMISSION FORM</h5>
+            <span>(Please fill in Block Letters)</span>
+        </div>
+        <table class="form-table">
+            <!-- <tr>
+                <td class="label">Admission ID:</td>
+                <td class="value" id="admissionId-print"></td>
+            </tr> -->
+            <tr>
+                <td class="label">1. Name of the student</td>
+                <td class="value" id="studentName-print"></td>
+            </tr>
+        </table>
+        <table class="form-table">
+            <tr>
+                <td class="label">1. Name of the student</td>
+                <td class="value" id="studentName-print"></td>
+            </tr>
+            <tr>
+                <td class="label">2. Date of birth (in figures and words)</td>
+                <td class="value" id="studentDOB-print"></td>
+            </tr>
+            <tr>
+                <td class="label">3. Place of birth & nationality</td>
+                <td class="value" id="studentNationality-print"></td>
+            </tr>
+            <tr>
+                <td class="label">4. Class into which admission is sought</td>
+                <td class="value" id="studentClass-print"></td>
+            </tr>
+            <tr>
+                <td class="label">5. Last School Attended</td>
+                <td class="value" id="studentLastSchool-print"></td>
+            </tr>
+            <tr>
+                <td class="label">6. Reason for Leaving last school</td>
+                <td class="value" id="studentReason-print"></td>
+            </tr>
+            <tr>
+                <td class="label">7. Father's Name</td>
+                <td class="value" id="fatherName-print"></td>
+            </tr>
+            <tr>
+                <td class="label">8. Father's Occupation</td>
+                <td class="value" id="fatherOccupation-print"></td>
+            </tr>
+            <tr>
+                <td class="label">9. Father's Office Address & Contact Details</td>
+                <td class="value" id="fatherContact-print"></td>
+            </tr>
+            <tr>
+                <td class="label">10. Mother's Name</td>
+                <td class="value" id="motherName-print"></td>
+            </tr>
+            <tr>
+                <td class="label">11. Mother's Occupation</td>
+                <td class="value" id="motherOccupation-print"></td>
+            </tr>
+            <tr>
+                <td class="label">12. Mother's Office Address & Contact Details</td>
+                <td class="value" id="motherContact-print"></td>
+            </tr>
+            <tr>
+                <td class="label">13. Guardian's Name (if required)</td>
+                <td class="value" id="guardianName-print"></td>
+            </tr>
+            <tr>
+                <td class="label">14. Residential Address</td>
+                <td class="value" id="address-print"></td>
+            </tr>
+            <tr>
+                <td class="label">15. Contact Details (Phone, email)</td>
+                <td class="value" id="contactDetails-print"></td>
+            </tr>
+            <tr>
+                <td class="label">16. Brothers and Sisters of applicant studying in this school</td>
+                <td class="value" id="siblings-print"></td>
+            </tr>
+            <tr>
+                <td class="label">17. Any medical or related information</td>
+                <td class="value" id="medical-print"></td>
+            </tr>
+        </table>
+
+        <div class="signature-line" style="margin-top: 5rem;">
+            <div>Signature of Parent or Guardian</div>
+        </div>
+
+    </div>
+    <div class="a4-page" id="page-2">
+
+        <div class="section-note">
+            <h5>Note: Parents are requested to carefully read the following before signing the form</h5>
+            <ol>
+                <li>Admission Fee Chalan will be issued upon submission of complete admission form alon with previous
+                    school leaving Certificate and birth certificate/NADRA Registration form</li>
+                <li>Parents are required to deposit copies of admission fee chalan in the school.</li>
+                <li>No cash payment should be made in the office. All kinds of Fee must me deposited in designated banks
+                </li>
+                <li>Parent are requested to deposit copy of admission fee challan in school.</li>
+                <li>Fee is charged on monthly basis, except at the time of admission and summer vacation i.e. June &
+                    July, for which two months advance fee will be charged.</li>
+                <li>Monthly tution Fee should be paid in advance by the 10th of each month. After due date a daily late
+                    payment fine of <b>Rs.20</b> will be charged by bank.</li>
+            </ol>
+        </div>
+
+        <div class="section-certificate">
+            <h5>CERTIFICATE FROM THE PARENTS</h5>
+            <p>1. Certified that the particulars, especially date of birth given is correct to the best of my knowledge.
+            </p>
+            <p>2. I have read and understood above instructions / rules about payment of fees and will abide by them.
+            </p>
+            <p>3. I understand that the student's retention in the section will be determined through periodical
+                examination by the headmistress.</p>
+        </div>
+
+        <div class="signature-line">
+            <div>Name of Parent/Guardian: <span class="value" id="parentName-print"
+                    style="font-size:1rem; border:none;"></span></div>
+            <div>Signature of Parent or Guardian</div>
+        </div>
+
+        <div class="official-use-section">
+    <h5>FOR OFFICIAL USE ONLY</h5>
+    <div class="row">
+        <div>Admission Allowed / Not Allowed: <span class="line"></span></div>
+    </div>
+    <div class="row">
+        <div>Class: <span class="line"></span></div>
+        <div>Section: <span class="line"></span></div>
+    </div>
+    
+    <h6 style="font-weight:700; margin-top:1.5rem;">Fee Collection Record:</h6>
+    <div class="row">
+        <div>1. Admission Fee: <span class="value" id="fee-admission-print"></span></div>
+        <div>2. Security Fee: <span class="value" id="fee-security-print"></span></div>
+    </div>
+    <div class="row">
+        <div>3. Annual Fee: <span class="value" id="fee-annual-print"></span></div>
+        <div>4. Tuition Fee: <span class="value" id="fee-tuition-print"></span></div>
+    </div>
+    <div class="row">
+        <div>Concession granted if any: <span class="value" id="fee-concession-print"></span></div>
+    </div>
+    <div class="row">
+        <div>Admission Fee Chalan issued: <span class="value" id="fee-chalan-print"></span></div>
+        <div>Due Date: <span class="value" id="fee-due-date-print"></span></div>
+    </div>
+    <div class="row">
+        <div>Admission Fee paid on: <span class="value" id="fee-paid-on-print"></span></div>
+        <div>Roll No: <span class="value" id="fee-rollno-print"></span></div>
+    </div>
+    
+    <div class="signature-line" style="margin-top: 3rem;">
+        <div>Admin. & Accounts Officer</div>
+        <div>Head of Institution</div>
+    </div>
+</div>
+
+    </div>
+    <script>
+        window.addEventListener('load', () => {
+            const dataString = localStorage.getItem('lastSubmissionData');
+            if (!dataString) {
+                document.body.innerHTML = '<h1>Error: No submission data found.</h1>';
+                return;
+            }
+            const student = JSON.parse(dataString);
+
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value || '---';
+                }
+            };
+
+            // Fill in all the fields
+            setText('studentName-print', student.studentName);
+            setText('studentDOB-print', student.studentDOB);
+            setText('studentNationality-print', student.studentNationality);
+            setText('studentClass-print', student.studentClass);
+            setText('studentLastSchool-print', student.studentLastSchool);
+            setText('studentReason-print', student.studentReason);
+            setText('fatherName-print', student.fatherName);
+            setText('fatherOccupation-print', student.fatherOccupation);
+            setText('fatherContact-print', student.fatherContact);
+            setText('motherName-print', student.motherName);
+            setText('motherOccupation-print', student.motherOccupation);
+            setText('motherContact-print', student.motherContact);
+            setText('guardianName-print', student.guardianName);
+            setText('address-print', student.address);
+            setText('contactDetails-print', student.contactDetails);
+            setText('siblings-print', student.siblings);
+            setText('medical-print', student.medical);
+            setText('admissionId-print', student.admissionId); // ADD THIS LINE
+    setText('studentName-print', student.studentName);
+
+            // Fill in the parent's name on page 2
+            setText('parentName-print', student.parentName);
+            setText('fee-admission-print', student.admissionFee);
+            setText('fee-security-print', student.securityFee);
+            setText('fee-annual-print', student.annualFee);
+            setText('fee-tuition-print', student.tuitionFee);
+            setText('fee-concession-print', student.concession);
+            setText('fee-chalan-print', student.chalanIssued);
+            setText('fee-due-date-print', student.dueDate);
+            setText('fee-paid-on-print', student.feePaidOn);
+            setText('fee-rollno-print', student.rollNo);
+
+
+            // Auto-print
+            window.print();
+        });
+    </script>
+</body>
+
+</html>

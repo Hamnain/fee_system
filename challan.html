@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Challan</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        /* --- 1. UNIVERSAL FIX for "out of the box" --- */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #00796b; /* Our app's theme color (teal) */
+            --page-bg: #e9ecef;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            font-family: 'Poppins', sans-serif;
+            font-size: 10pt;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .a4-page {
+            width: 210mm;
+            height: 297mm; /* --- FIX: Set a FIRM height --- */
+            margin: 1rem auto;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            padding: 15mm; /* 15mm top/bottom margins */
+            
+            /* --- FIX: Use flex to space out copies --- */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+        }
+
+        .challan-copy {
+            width: 100%;
+            /* --- FIX: Set height to ~1/3 of available space --- */
+            /* (297mm - 30mm padding) = 267mm. 267 / 3 = 89mm per copy */
+            height: 89mm; 
+            
+            margin-bottom: 0; /* --- FIX: No margin, flex handles spacing --- */
+            padding: 6mm; /* --- FIX: Reduced padding to give text more room --- */
+            
+            border-radius: 12px;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .challan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 8px; /* --- FIX: Reduced padding --- */
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .school-info h4 { font-weight: 700; color: var(--primary-color); margin: 0; font-size: 1.1rem; }
+        .school-info p { font-size: 0.85rem; color: var(--text-light); margin: 0; }
+        .copy-type { font-weight: 600; font-size: 1rem; color: var(--primary-color); }
+
+        .challan-body {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px; /* --- FIX: Reduced margin --- */
+            flex-grow: 1;
+        }
+        
+        .student-details { width: 55%; }
+        .fee-details { width: 43%; }
+
+        .detail-item {
+            margin-bottom: 6px; /* --- FIX: Reduced margin --- */
+        }
+        .detail-label {
+            font-size: 0.75rem; /* --- FIX: Reduced font size --- */
+            font-weight: 500;
+            color: var(--text-light);
+            display: block;
+            margin-bottom: -4px; /* --- FIX: Tightened spacing --- */
+        }
+        .detail-value {
+            font-size: 0.95rem; /* --- FIX: Reduced font size --- */
+            font-weight: 600;
+            color: var(--text-dark);
+            /* --- FIX: Allow text to wrap --- */
+            word-wrap: break-word; 
+        }
+        
+        /* Fee Table Style */
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+        .fee-table th {
+            background-color: #f8f9fa;
+            padding: 6px; /* --- FIX: Reduced padding --- */
+            text-align: left;
+            font-size: 0.8rem; /* --- FIX: Reduced font size --- */
+            color: var(--text-dark);
+        }
+        .fee-table td {
+            padding: 6px; /* --- FIX: Reduced padding --- */
+            border-top: 1px solid #dee2e6;
+            font-size: 0.85rem; /* --- FIX: Reduced font size --- */
+        }
+        .fee-table .amount {
+            text-align: right;
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+        }
+        .fee-table tr.total-row {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem; /* --- FIX: Reduced font size --- */
+        }
+        .fee-table tr.total-row .amount { color: #ffffff; }
+        
+        .total-in-words {
+            margin-top: 8px; /* --- FIX: Reduced margin --- */
+            font-size: 0.75rem; /* --- FIX: Reduced font size --- */
+            color: var(--text-light);
+            line-height: 1.4; /* --- FIX: Allow wrapping --- */
+        }
+        .total-in-words span {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.85rem; /* --- FIX: Reduced font size --- */
+        }
+        
+        .challan-footer {
+            margin-top: 10px; /* --- FIX: Reduced margin --- */
+            padding-top: 8px; /* --- FIX: Reduced padding --- */
+            border-top: 1px dashed #ced4da;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .signature-box {
+            border-top: 2px solid #333;
+            width: 40%;
+            text-align: center;
+            padding-top: 5px;
+            font-weight: 500;
+        }
+        .bank-stamp-box {
+            width: 110px;
+            height: 50px;
+            border: 2px dashed #ced4da;
+            text-align: center;
+            padding-top: 15px;
+        }
+
+        /* --- PRINT STYLES --- */
+        @media print {
+            body { background-color: #fff; }
+            .a4-page {
+                margin: 0; padding: 0;
+                width: 100%; height: 100%; /* Use 100% height of print page */
+                box-shadow: none; border: none;
+            }
+            .challan-copy {
+                box-shadow: none;
+                border: 1px solid #aaa;
+                border-bottom: 2px dashed #000;
+                height: 33.33%; /* Each copy is exactly 1/3 of the page */
+                padding: 8mm; /* Reset padding for print */
+                margin: 0; /* No margin in print */
+            }
+            .challan-copy:last-child { 
+                border-bottom: 1px solid #aaa;
+                page-break-after: auto; 
+            }
+            .no-print { display: none; }
+            .fee-table tr.total-row, .copy-type {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print" style="text-align: center; padding: 1rem;">
+        <button onclick="window.print()" style="font-family: 'Poppins', sans-serif; font-size: 1rem; padding:10px 20px; background-color: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;">
+            <i class="bi bi-printer-fill me-2"></i>Print Challan
+        </button>
+        <button onclick="window.close()" style="font-family: 'Poppins', sans-serif; font-size: 1rem; padding:10px 20px; background-color: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+            Close Tab
+        </button>
+    </div>
+
+    <div class="a4-page">
+
+        <div class="challan-copy">
+            <div class="challan-header">
+                <div class="school-info">
+                    <h4 style="text-align: center;">IIUI Schools</h4>
+                    <p>Bank: Habib Bank Limited | A/C #: 13497901233403 <br> Bank Al habib | A/C #: 0080-901027-01 <br> Allied Bank | A/C #: 1234-00100191</p>
+                </div>
+                <div class="copy-type">BANK COPY</div>
+            </div>
+            <div class="challan-body">
+                <div class="student-details">
+                    <div class="detail-item"><span class="detail-label">Student Name</span><span class="detail-value challan-studentName"></span></div>
+                    <div class="detail-item"><span class="detail-label">Admission ID</span><span class="detail-value challan-admissionId"></span></div>
+                    <div class="detail-item"><span class="detail-label">Roll No.</span><span class="detail-value challan-rollNo"></span></div>
+                    <div class="detail-item"><span class="detail-label">Class</span><span class="detail-value challan-studentClass"></span></div>
+                    <div class="detail-item"><span class="detail-label">Issue Date</span><span class="detail-value challan-issueDate"></span></div>
+                    <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value challan-dueDate"></span></div>
+                </div>
+                <div class="fee-details">
+                    <table class="fee-table">
+                        <thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead>
+                        <tbody>
+                            <tr><td>Admission Fee:</td><td class="amount challan-admissionFee"></td></tr>
+                            <tr><td>Security Fee:</td><td class="amount challan-securityFee"></td></tr>
+                            <tr><td>Tuition Fee:</td><td class="amount challan-tuitionFee"></td></tr>
+                            <tr class="total-row"><td>Total Amount</td><td class="amount challan-totalFee"></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="total-in-words">Amount in Words: <span class="challan-totalInWords"></span></div>
+                </div>
+            </div>
+            <div class="challan-footer">
+                <div class="signature-box">Depositor's Signature</div>
+                <div class="bank-stamp-box">Bank Stamp</div>
+            </div>
+        </div>
+
+        <div class="challan-copy">
+            <div class="challan-header">
+                <div class="school-info"><h4>IIUI Schools</h4><p>Bank: [Your Bank Name] | A/C #: 1234-567890123</p></div>
+                <div class="copy-type">SCHOOL COPY</div>
+            </div>
+            <div class="challan-body">
+                <div class="student-details">
+                    <div class="detail-item"><span class="detail-label">Student Name</span><span class="detail-value challan-studentName"></span></div>
+                    <div class="detail-item"><span class="detail-label">Admission ID</span><span class="detail-value challan-admissionId"></span></div>
+                    <div class="detail-item"><span class="detail-label">Roll No.</span><span class="detail-value challan-rollNo"></span></div>
+                    <div class="detail-item"><span class="detail-label">Class</span><span class="detail-value challan-studentClass"></span></div>
+                    <div class="detail-item"><span class="detail-label">Issue Date</span><span class="detail-value challan-issueDate"></span></div>
+                    <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value challan-dueDate"></span></div>
+                </div>
+                <div class="fee-details">
+                    <table class="fee-table">
+                        <thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead>
+                        <tbody>
+                            <tr><td>Admission Fee:</td><td class="amount challan-admissionFee"></td></tr>
+                            <tr><td>Security Fee:</td><td class="amount challan-securityFee"></td></tr>
+                            <tr><td>Tuition Fee:</td><td class="amount challan-tuitionFee"></td></tr>
+                            <tr class="total-row"><td>Total Amount</td><td class="amount challan-totalFee"></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="total-in-words">Amount in Words: <span class="challan-totalInWords"></span></div>
+                </div>
+            </div>
+            <div class="challan-footer">
+                <div class="signature-box">Depositor's Signature</div>
+                <div class="bank-stamp-box">Bank Stamp</div>
+            </div>
+        </div>
+
+        <div class="challan-copy">
+            <div class="challan-header">
+                <div class="school-info"><h4>IIUI Schools</h4><p>Bank: [Your Bank Name] | A/C #: 1234-567890123</p></div>
+                <div class="copy-type">STUDENT COPY</div>
+            </div>
+            <div class="challan-body">
+                <div class="student-details">
+                    <div class="detail-item"><span class="detail-label">Student Name</span><span class="detail-value challan-studentName"></span></div>
+                    <div class="detail-item"><span class="detail-label">Admission ID</span><span class="detail-value challan-admissionId"></span></div>
+                    <div class="detail-item"><span class="detail-label">Roll No.</span><span class="detail-value challan-rollNo"></span></div>
+                    <div class="detail-item"><span class="detail-label">Class</span><span class="detail-value challan-studentClass"></span></div>
+                    <div class="detail-item"><span class="detail-label">Issue Date</span><span class="detail-value challan-issueDate"></span></div>
+                    <div class="detail-item"><span class="detail-label">Due Date</span><span class="detail-value challan-dueDate"></span></div>
+                </div>
+                <div class="fee-details">
+                    <table class="fee-table">
+                        <thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead>
+                        <tbody>
+                            <tr><td>Admission Fee:</td><td class="amount challan-admissionFee"></td></tr>
+                            <tr><td>Security Fee:</td><td class="amount challan-securityFee"></td></tr>
+                            <tr><td>Tuition Fee:</td><td class="amount challan-tuitionFee"></td></tr>
+                            <tr class="total-row"><td>Total Amount</td><td class="amount challan-totalFee"></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="total-in-words">Amount in Words: <span class="challan-totalInWords"></span></div>
+                </div>
+            </div>
+            <div class="challan-footer">
+                <div class="signature-box">Depositor's Signature</div>
+                <div class="bank-stamp-box">Bank Stamp</div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        // --- Number to Words Function ---
+        function numberToWords(num) {
+            const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+            const b = ['','','Twenty ','Thirty ','Forty ','Fifty ','Sixty ','Seventy ','Eighty ','Ninety '];
+            const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return '';
+            let str = '';
+            str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            return str.trim() + ' Only';
+        }
+        
+        window.addEventListener('load', () => {
+            const dataString = localStorage.getItem('challanData');
+            if (!dataString) {
+                document.body.innerHTML = '<h1>Error: No challan data found.</h1>';
+                return;
+            }
+            
+            const data = JSON.parse(dataString);
+            const student = data.student;
+            const fees = data.fees;
+            
+            const total = (fees.admission || 0) + (fees.security || 0) + (fees.tuition || 0);
+            const totalInWords = numberToWords(total);
+            const issueDate = new Date().toLocaleDateString();
+            
+            const setText = (className, value) => {
+                document.querySelectorAll('.' + className).forEach(el => {
+                    el.textContent = value || '---';
+                });
+            };
+            
+            const setCurrency = (className, value) => {
+                 document.querySelectorAll('.' + className).forEach(el => {
+                    el.textContent = (value || 0).toLocaleString();
+                });
+            };
+            const setTotal = (className, value) => {
+                 document.querySelectorAll('.' + className).forEach(el => {
+                    el.textContent = "PKR " + (value || 0).toLocaleString();
+                });
+            };
+
+            // Populate all three copies
+            setText('challan-studentName', student.studentName);
+            setText('challan-admissionId', student.admissionId);
+            setText('challan-rollNo', student.rollNo); 
+            setText('challan-studentClass', student.studentClass);
+            
+            setText('challan-issueDate', issueDate);
+            setText('challan-dueDate', data.dueDate);
+            
+            setCurrency('challan-admissionFee', fees.admission);
+            setCurrency('challan-securityFee', fees.security);
+            setCurrency('challan-tuitionFee', fees.tuition);
+            setTotal('challan-totalFee', total);
+            setText('challan-totalInWords', totalInWords);
+            
+            window.print();
+        });
+    </script>
+</body>
+</html>

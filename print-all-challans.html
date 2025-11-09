@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print All Challans</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body { background-color: #e9ecef; font-family: 'Roboto', 'Arial', sans-serif; font-size: 10pt; }
+        .a4-page { width: 210mm; height: 297mm; margin: 1rem auto; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); box-sizing: border-box; padding: 10mm; }
+        .challan-copy { width: 100%; height: 96mm; border: 2px solid #000; margin-bottom: 1.5mm; box-sizing: border-box; padding: 5mm; display: flex; flex-direction: column; }
+        .challan-copy:last-child { margin-bottom: 0; }
+        .challan-header { display: flex; justify-content: space-between; align-items: center; }
+        .school-logo { font-weight: 700; font-size: 1.2rem; }
+        .bank-info h4 { margin: 0; font-size: 1.1rem; text-align: right; }
+        .bank-info p { margin: 0; font-size: 0.9rem; text-align: right; }
+        .title-bar { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #000; border-bottom: 2px solid #000; margin: 8px 0; padding: 4px; }
+        .title-bar span { font-weight: 700; font-size: 1.1rem; }
+        .title-bar .copy-type { background: #000; color: #fff; padding: 2px 8px; font-size: 0.9rem; }
+        .challan-body { display: flex; justify-content: space-between; flex-grow: 1; }
+        .student-details { width: 55%; border-right: 1px solid #000; padding-right: 10px; }
+        .fee-details { width: 43%; }
+        .data-table, .fee-table { width: 100%; border-collapse: collapse; }
+        .data-table td, .fee-table th, .fee-table td { border: 1px solid #000; padding: 5px; }
+        .data-table .label { font-weight: 500; width: 40%; }
+        .data-table .value { font-weight: 700; font-size: 1rem; text-align: right; }
+        .fee-table th { background-color: #f0f0f0; font-size: 0.9rem; text-align: left; }
+        .fee-table td { font-size: 0.9rem; }
+        .fee-table .amount { text-align: right; font-weight: 700; }
+        .fee-table tr.total-row { background-color: #f0f0f0; }
+        .fee-table .total-row td { font-weight: 700; font-size: 1rem; }
+        .total-in-words { border: 1px solid #000; padding: 5px; margin-top: 10px; font-size: 0.8rem; }
+        .total-in-words span { font-weight: 700; font-size: 0.9rem; text-decoration: underline; }
+        .challan-footer { display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #000; }
+        .signature-box { border-top: 1px solid #000; width: 40%; text-align: center; font-size: 0.8rem; padding-top: 5px; }
+        .bank-stamp-box { width: 100px; height: 50px; border: 1px solid #000; text-align: center; font-size: 0.8rem; }
+        
+        @media print {
+            body { background-color: #fff; }
+            .a4-page { margin: 0; padding: 0; width: 100%; height: auto; box-shadow: none; border: none; page-break-after: always; }
+            .a4-page:last-child { page-break-after: auto; }
+            .challan-copy { border: none; border-bottom: 2px dashed #000; }
+            .challan-copy:last-child { border-bottom: none; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align: center; padding: 1rem;">
+        <h3 id="loading-message">Loading challans... Please wait.</h3>
+        <button onclick="window.print()" style="padding:10px 20px;">Print All</button>
+        <button onclick="window.close()" style="padding:10px 20px;">Close</button>
+    </div>
+    
+    <div id="print-container">
+        </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Your Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIVlksOyjV4e6TyiJysL7ovITrQ60v7Q4",
+            authDomain: "feesystem-fe78e.firebaseapp.com",
+            projectId: "feesystem-fe78e",
+            storageBucket: "feesystem-fe78e.firebasestorage.app",
+            messagingSenderId: "772128934957",
+            appId: "1:772128934957:web:0eeeebed3be0343cf77ca4",
+            measurementId: "G-XQ0HWT03HK"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Number to Words Function (copied from challan.html) ---
+        function numberToWords(num) {
+            const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+            const b = ['','','Twenty ','Thirty ','Forty ','Fifty ','Sixty ','Seventy ','Eighty ','Ninety '];
+            const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return '';
+            let str = '';
+            str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            return str.trim() + ' Only';
+        }
+        
+        // --- Function to build the HTML for ONE 3-part challan ---
+        function createChallanHtml(student, fees, dates) {
+            const total = (fees.admission || 0) + (fees.security || 0) + (fees.tuition || 0);
+            const totalInWords = numberToWords(total);
+
+            // This is the template for one full A4 page
+            return `
+            <div class="a4-page">
+                <div class="challan-copy">
+                    <div class="challan-header"><div class="school-logo">IIU Schools</div><div class="bank-info"><h4>BANK NAME HERE</h4><p>A/C #: 1234-567890123</p></div></div>
+                    <div class="title-bar"><span>International Islamic University Schools</span><span class="copy-type">BANK COPY</span></div>
+                    <div class="challan-body">
+                        <div class="student-details">
+                            <table class="data-table">
+                                <tr><td class="label">Student Name:</td><td class="value">${student.studentName}</td></tr>
+                                <tr><td class="label">Admission ID:</td><td class="value">${student.admissionId}</td></tr>
+                                <tr><td class="label">Class:</td><td class="value">${student.studentClass}</td></tr>
+                                <tr><td class="label">Issue Date:</td><td class="value">${dates.issueDate}</td></tr>
+                                <tr><td class="label">Due Date:</td><td class="value">${dates.dueDate}</td></tr>
+                            </table>
+                        </div>
+                        <div class="fee-details">
+                            <table class="fee-table">
+                                <thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Admission Fee:</td><td class="amount">${fees.admission.toLocaleString()}</td></tr>
+                                    <tr><td>Security Fee:</td><td class="amount">${fees.security.toLocaleString()}</td></tr>
+                                    <tr><td>Tuition Fee:</td><td class="amount">${fees.tuition.toLocaleString()}</td></tr>
+                                    <tr class="total-row"><td class="label">Total Amount</td><td class="amount">PKR ${total.toLocaleString()}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="total-in-words">Amount in Words: <span>${totalInWords}</span></div>
+                    <div class="challan-footer"><div class="signature-box">Depositor's Signature</div><div class="bank-stamp-box">Bank Stamp & Signature</div></div>
+                </div>
+                <div class="challan-copy">
+                    <div class="challan-header"><div class="school-logo">IIU Schools</div><div class="bank-info"><h4>BANK NAME HERE</h4><p>A/C #: 1234-567890123</p></div></div>
+                    <div class="title-bar"><span>International Islamic University Schools</span><span class="copy-type">SCHOOL COPY</span></div>
+                    <div class="challan-body"><div class="student-details"><table class="data-table"><tr><td class="label">Student Name:</td><td class="value">${student.studentName}</td></tr><tr><td class="label">Admission ID:</td><td class="value">${student.admissionId}</td></tr><tr><td class="label">Class:</td><td class="value">${student.studentClass}</td></tr><tr><td class="label">Issue Date:</td><td class="value">${dates.issueDate}</td></tr><tr><td class="label">Due Date:</td><td class="value">${dates.dueDate}</td></tr></table></div><div class="fee-details"><table class="fee-table"><thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead><tbody><tr><td>Admission Fee:</td><td class="amount">${fees.admission.toLocaleString()}</td></tr><tr><td>Security Fee:</td><td class="amount">${fees.security.toLocaleString()}</td></tr><tr><td>Tuition Fee:</td><td class="amount">${fees.tuition.toLocaleString()}</td></tr><tr class="total-row"><td class="label">Total Amount</td><td class="amount">PKR ${total.toLocaleString()}</td></tr></tbody></table></div></div>
+                    <div class="total-in-words">Amount in Words: <span>${totalInWords}</span></div>
+                    <div class="challan-footer"><div class="signature-box">Depositor's Signature</div><div class="bank-stamp-box">Bank Stamp & Signature</div></div>
+                </div>
+                <div class="challan-copy">
+                    <div class="challan-header"><div class="school-logo">IIU Schools</div><div class="bank-info"><h4>BANK NAME HERE</h4><p>A/C #: 1234-567890123</p></div></div>
+                    <div class="title-bar"><span>International Islamic University Schools</span><span class="copy-type">STUDENT COPY</span></div>
+                    <div class="challan-body"><div class="student-details"><table class="data-table"><tr><td class="label">Student Name:</td><td class="value">${student.studentName}</td></tr><tr><td class="label">Admission ID:</td><td class="value">${student.admissionId}</td></tr><tr><td class="label">Class:</td><td class="value">${student.studentClass}</td></tr><tr><td class="label">Issue Date:</td><td class="value">${dates.issueDate}</td></tr><tr><td class="label">Due Date:</td><td class="value">${dates.dueDate}</td></tr></table></div><div class="fee-details"><table class="fee-table"><thead><tr><th>Particulars</th><th class="amount">Amount</th></tr></thead><tbody><tr><td>Admission Fee:</td><td class="amount">${fees.admission.toLocaleString()}</td></tr><tr><td>Security Fee:</td><td class="amount">${fees.security.toLocaleString()}</td></tr><tr><td>Tuition Fee:</td><td class="amount">${fees.tuition.toLocaleString()}</td></tr><tr class="total-row"><td class="label">Total Amount</td><td class="amount">PKR ${total.toLocaleString()}</td></tr></tbody></table></div></div>
+                    <div class="total-in-words">Amount in Words: <span>${totalInWords}</span></div>
+                    <div class="challan-footer"><div class="signature-box">Depositor's Signature</div><div class="bank-stamp-box">Bank Stamp & Signature</div></div>
+                </div>
+            </div>
+            `;
+        }
+        
+        // --- Main function to load and print all challans ---
+        async function loadAndPrint() {
+            const container = document.getElementById('print-container');
+            const loadingMsg = document.getElementById('loading-message');
+            
+            const idQueue = JSON.parse(localStorage.getItem('printQueue') || '[]');
+            if (idQueue.length === 0) {
+                loadingMsg.textContent = 'Error: No students selected.';
+                return;
+            }
+
+            loadingMsg.textContent = `Loading ${idQueue.length} challan(s)...`;
+            
+            const issueDate = new Date().toLocaleDateString();
+            const dueDate = new Date(new Date().setDate(new Date().getDate() + 10)).toLocaleDateString();
+            
+            // Loop and fetch each student one by one
+            for (const id of idQueue) {
+                const docRef = doc(db, "admissions", id);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const student = docSnap.data();
+                    const fs = student.feeStatus;
+                    
+                    // Get only unpaid fees
+                    const feesToPay = {
+                        admission: fs.admissionFee.status === 'unpaid' ? fs.admissionFee.amount : 0,
+                        security: fs.securityFee.status === 'unpaid' ? fs.securityFee.amount : 0,
+                        tuition: fs.tuitionFee.status === 'unpaid' ? fs.tuitionFee.amount : 0
+                    };
+                    
+                    const dates = { issueDate, dueDate };
+                    
+                    // Create the HTML for this student's challan and add it to the page
+                    container.innerHTML += createChallanHtml(student, feesToPay, dates);
+                }
+            }
+            
+            // All challans are loaded
+            loadingMsg.textContent = `Loaded ${idQueue.length} challan(s). Printing...`;
+            
+            // Clear the queue so it doesn't print again on refresh
+            localStorage.removeItem('printQueue');
+            
+            // Print!
+            window.print();
+        }
+
+        loadAndPrint();
+    </script>
+</body>
+</html>
